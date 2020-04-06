@@ -24,7 +24,7 @@ const config = {
 const connectionPool = new sql.ConnectionPool(config)
   .connect()
   .then((pool) => {
-    console.log("Connected to MSSQL");
+    console.log("Connected");
     return pool;
   })
   .catch((err) => console.log("Connection Failed: ", err));
@@ -32,8 +32,6 @@ const connectionPool = new sql.ConnectionPool(config)
 const message = (num, res) => {
   res.writeHead(404, {
     "Content-type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "*",
   });
   switch (num) {
     case 1:
@@ -91,53 +89,53 @@ const splitUrl = (str) => {
   return mas;
 };
 
-const getDB = (tab) => {
+const getDB = (table) => {
   return connectionPool.then((pool) => {
-    return pool.query(`select * from ${tab}`);
+    return pool.query(`select * from ${table}`);
   });
 };
 
-const setDB = (tab, fields) => {
+const setDB = (table, body) => {
   return connectionPool.then((pool) => {
     let str = "";
     const req = pool.request();
-    for (el in fields) {
-      let elType = Number.isInteger(fields[el]) ? sql.Int : sql.NVarChar;
-      req.input(el, elType, fields[el]);
+    for (el in body) {
+      let elType = Number.isInteger(body[el]) ? sql.Int : sql.NVarChar;
+      req.input(el, elType, body[el]);
       str += `@${el},`;
     }
     console.log(`inserted`);
-    return req.query(`insert into ${tab} values ( ${str.slice(0, -1)})`);
+    return req.query(`insert into ${table} values ( ${str.slice(0, -1)})`);
   });
 };
 
-const updateDB = (tab, fields) => {
+const updateDB = (table, body) => {
   return connectionPool.then((pool) => {
     let str = "";
     let condition = "";
     let isStr;
     const req = pool.request();
-    for (el in fields) {
-      isStr = Number.isInteger(fields[el]) ? false : true;
-      if (tab !== el) {
-        if (isStr) str += `${el} = '${fields[el]}',`;
-        else str += `${el} = ${fields[el]}, `;
+    for (el in body) {
+      isStr = Number.isInteger(body[el]) ? false : true;
+      if (table !== el) {
+        if (isStr) str += `${el} = '${body[el]}',`;
+        else str += `${el} = ${body[el]}, `;
       } else {
-        if (isStr) condition = `'${fields[el]}'`;
-        else condition = fields[el];
+        if (isStr) condition = `'${body[el]}'`;
+        else condition = body[el];
       }
     }
     return req.query(
-      `update ${tab} set  ${str.slice(0, -1)} where ${tab}=${condition}`
+      `update ${table} set  ${str.slice(0, -1)} where ${table}=${condition}`
     );
   });
 };
-const deleteDB = (tab, id, some) => {
+const deleteDB = (table, id, some) => {
   return connectionPool.then((pool) => {
-    some = some ? some : tab;
+    some = some ? some : table;
     const req = pool.request();
     id = decodeURI(id);
-    return req.query(`delete ${tab} where ${some} = '${id}'`);
+    return req.query(`delete ${table} where ${some} = '${id}'`);
   });
 };
 
@@ -183,8 +181,6 @@ const getReq = (res, url) => {
         getDB("PULPIT").then((records) => {
           res.writeHead(200, {
             "Content-Type": "application/json; charset=utf-8",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "*",
           });
           res.end(JSON.stringify(records.recordset));
         });
@@ -331,7 +327,7 @@ const deleteReq = (req, res, url, body) => {
         break;
       case "pulpits":
         req.on("end", () => {
-          deleteDB("FACULTY", url[3]);
+          deleteDB("PULPIT", url[3]);
           message(2, res);
         });
         break;
@@ -344,14 +340,14 @@ const deleteReq = (req, res, url, body) => {
 
       case "auditoriumstypes":
         req.on("end", () => {
-          deleteDB("FACULTY", url[3]);
+          deleteDB("AUDITORIUM_TYPE", url[3]);
           message(2, res);
         });
         break;
 
       case "auditoriums":
         req.on("end", () => {
-          deleteDB("FACULTY", url[3]);
+          deleteDB("AUDITORIUM", url[3]);
           message(2, res);
         });
         break;

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <script>
+    let getQuery = () => {
+      fetch("http://localhost:3000/api/pulpits", {
+        method: "GET",
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          let box = document.getElementById("but");
+          box.innerHTML = "";
+          data.forEach((el) => {
+            let div = document.createElement("div");
+            div.innerHTML = `<span>${el.PULPIT}, ${el.PULPIT_NAME}, ${el.FACULTY} </span><br>`;
+            box.append(div);
+          });
+        });
+    };
+    const postQuery = () => {
+      let body = {
+        PULPIT: "PULPIT",
+        PULPIT_NAME: "PULPIT NAME",
+        FACULTY: "ЛХФ",
+      };
+      fetch("http://localhost:3000/api/pulpits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          let box = document.getElementById("but");
+          let div = document.createElement("div");
+          box.innerHTML = "";
+          div.innerHTML = `<span>${data.num}: ${data.message}</span><br>`;
+          box.append(div);
+        });
+    };
+
+    const putQuery = async () => {
+      let body = {
+        PULPIT: "ТЛ",
+        PULPIT_NAME: "текст",
+        FACULTY: "ЛХФ",
+      };
+      fetch("http://localhost:3000/api/pulpits", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          let box = document.getElementById("but");
+          let div = document.createElement("div");
+          box.innerHTML = "";
+          div.innerHTML = `<span>${data.num}: ${data.message}</span><br>`;
+          box.append(div);
+        });
+    };
+    const deleteQuery = () => {
+      fetch("http://localhost:3000/api/pulpits/ОХ", {
+        method: "DELETE",
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          let box = document.getElementById("but");
+          let div = document.createElement("div");
+          box.innerHTML = "";
+          div.innerHTML = `<span>${data.num}: ${data.message}</span><br>`;
+          box.append(div);
+        });
+    };
+  </script>
+
+  <body>
+    <div id="but"></div>
+    <button onclick="getQuery()">BUT</button>
+    <button onclick="postQuery()">BUT</button>
+    <button onclick="putQuery()">BUT</button>
+    <button onclick="deleteQuery()">BUT</button>
+  </body>
+</html>
